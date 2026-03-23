@@ -105,7 +105,36 @@ This repository is packaged for Vercel:
 - serverless API handlers under `api/`
 - shared backend logic reused from `backend/src`
 
-Set the required frontend and backend environment variables in Vercel before deploying.
+### Direct Vercel Deployment
+
+1. Import this GitHub repository into Vercel.
+2. Keep the root as the project root.
+3. Build command: `npm run build`
+4. Output directory: `build`
+5. Add these environment variables in Vercel for both Preview and Production:
+
+```env
+MONGODB_URI=your-mongodb-atlas-uri
+GOOGLE_CLIENT_ID=your-google-client-id.apps.googleusercontent.com
+JWT_SECRET=your-jwt-secret
+JWT_EXPIRES_IN=7d
+ADMIN_CHALLENGE_EXPIRES_IN=10m
+ALLOWED_EMAIL_DOMAINS=glbitm.ac.in
+ALLOWED_EMAILS=pranjalwork2022@gmail.com,keshavguptauidev@gmail.com
+ADMIN_EMAILS=pranjalwork2022@gmail.com,keshavguptauidev@gmail.com
+ADMIN_ACCESS_CODE=your-unique-admin-code
+REACT_APP_GOOGLE_CLIENT_ID=your-google-client-id.apps.googleusercontent.com
+REACT_APP_ALLOWED_DOMAIN=glbitm.ac.in
+```
+
+6. Leave `REACT_APP_API_BASE_URL` unset on Vercel. The frontend is already configured to use same-origin `/api` automatically outside localhost.
+7. In Vercel Project Settings, enable automatically exposed system environment variables. The backend is configured to accept the current Vercel deployment URL through `VERCEL_URL`, `VERCEL_BRANCH_URL`, and `VERCEL_PROJECT_PRODUCTION_URL`.
+8. In Google Cloud Console, add your Vercel production domain and preview domain/origins to the OAuth client before testing login.
+
+Vercel references used for this setup:
+
+- https://examples.vercel.com/docs/environment-variables/system-environment-variables
+- https://vercel.com/docs/project-configuration/vercel-json
 
 ## Credits
 

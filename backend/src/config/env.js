@@ -10,6 +10,33 @@ const parseCsvList = (...values) => {
   return [...new Set(entries)];
 };
 
+const toOrigin = (value) => {
+  const normalized = String(value || "").trim().toLowerCase();
+
+  if (!normalized) {
+    return "";
+  }
+
+  if (
+    normalized.startsWith("http://") ||
+    normalized.startsWith("https://")
+  ) {
+    return normalized.replace(/\/+$/, "");
+  }
+
+  return `https://${normalized}`.replace(/\/+$/, "");
+};
+
+const parseOriginList = (...values) => {
+  const entries = values
+    .filter(Boolean)
+    .flatMap((value) => value.split(","))
+    .map((value) => toOrigin(value))
+    .filter(Boolean);
+
+  return [...new Set(entries)];
+};
+
 const port = Number(process.env.PORT || 5000);
 
 const env = {
@@ -21,9 +48,12 @@ const env = {
   JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN || "7d",
   ADMIN_CHALLENGE_EXPIRES_IN:
     process.env.ADMIN_CHALLENGE_EXPIRES_IN || "10m",
-  CLIENT_ORIGINS: parseCsvList(
+  CLIENT_ORIGINS: parseOriginList(
     process.env.CLIENT_ORIGINS,
-    process.env.CLIENT_ORIGIN
+    process.env.CLIENT_ORIGIN,
+    process.env.VERCEL_URL,
+    process.env.VERCEL_BRANCH_URL,
+    process.env.VERCEL_PROJECT_PRODUCTION_URL
   ),
   ALLOWED_EMAIL_DOMAINS: parseCsvList(
     process.env.ALLOWED_EMAIL_DOMAINS,
