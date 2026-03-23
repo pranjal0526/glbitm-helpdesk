@@ -1,0 +1,31 @@
+{
+  "name": "glb-helpdesk-backend",
+  "version": "1.0.0",
+  "description": "Backend API for the college complaint management system",
+  "main": "server.js",
+  "type": "commonjs",
+  "scripts": {
+    "dev": "nodemon server.js",
+    "start": "node server.js"
+  },
+  "keywords": [
+    "express",
+    "mongoose",
+    "google-oauth",
+    "jwt",
+    "complaint-management"
+  ],
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "google-auth-library": "^10.6.0",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.13.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
+  }
+}
+

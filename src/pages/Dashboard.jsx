@@ -1,6 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import toast from 'react-hot-toast';
+
 import { useAuth } from '../context/AuthContext';
+import { api, getApiErrorMessage } from '../utils/api';
+import {
+  formatDate,
+  getComplaintIssueLabel,
+  normalizeComplaintStatus,
+} from '../utils/formatters';
 
 const ISSUE_ICONS = {
   fan: '🌀', window: '🪟', door: '🚪',
@@ -8,27 +16,46 @@ const ISSUE_ICONS = {
   ac: '❄️', projector: '📽️', other: '🔧'
 };
 
-// Fake complaints for now — replace with API later
-const MOCK_COMPLAINTS = [
-  { _id: '1', ticketId: 'GLB-0001', category: 'hostel',    issueType: 'fan',      floor: '2', roomNumber: '204', status: 'open',        createdAt: new Date() },
-  { _id: '2', ticketId: 'GLB-0002', category: 'classroom', issueType: 'projector',floor: '1', roomNumber: 'CS-101', status: 'in-progress', createdAt: new Date() },
-  { _id: '3', ticketId: 'GLB-0003', category: 'hostel',    issueType: 'light',    floor: '3', roomNumber: '310', status: 'resolved',     createdAt: new Date() },
-];
-
 export default function Dashboard() {
   const { user } = useAuth();
   const [complaints, setComplaints] = useState([]);
-  const [loading, setLoading]       = useState(true);
-  const [mounted, setMounted]       = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    // Simulate loading — replace with real API call later
-    const timer = setTimeout(() => {
-      setComplaints(MOCK_COMPLAINTS);
-      setLoading(false);
-    }, 1000);
+    let cancelled = false;
+
+    const loadComplaints = async () => {
+      try {
+        const { data } = await api.get('/complaints');
+
+        if (!cancelled) {
+          setComplaints(
+            (data.complaints || []).map((complaint) => ({
+              ...complaint,
+              status: normalizeComplaintStatus(complaint.status),
+            }))
+          );
+        }
+      } catch (error) {
+        if (!cancelled) {
+          toast.error(
+            getApiErrorMessage(error, 'Unable to load your complaint overview.')
+          );
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    };
+
     setMounted(true);
-    return () => clearTimeout(timer);
+    loadComplaints();
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const stats = [
@@ -104,7 +131,7 @@ export default function Dashboard() {
       <div style={{
         display: 'grid',
         gridTemplateColumns: 'repeat(3, 1fr)',
-        gap: 14, marginBottom: 32
+        gap: 12, marginBottom: 28
       }}>
         {stats.map((s, i) => (
           <div key={s.label} className="card" style={{
@@ -146,8 +173,13 @@ export default function Dashboard() {
         ))}
       </div>
 
-      {/* ── Main grid ── */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: 20 }}>
+      {/* ── Main grid — side by side on desktop, stacked on mobile ── */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+        gap: 20,
+        alignItems: 'start',
+      }}>
 
         {/* Recent complaints */}
         <div>
@@ -193,52 +225,71 @@ export default function Dashboard() {
                   + New Complaint
                 </Link>
               </div>
-            ) : (
+             ) : (
               complaints.slice(0, 5).map((c, i) => (
-                <div key={c._id} className="card" style={{
-                  padding: '14px 18px',
-                  display: 'flex', alignItems: 'center',
-                  gap: 14, cursor: 'pointer',
-                  animation: `fadeUp 0.4s ease both ${0.1 + i * 0.07}s`,
-                  transition: 'transform 0.18s ease, border-color 0.18s ease'
-                }}
-                onMouseEnter={e => {
-                  e.currentTarget.style.transform = 'translateX(4px)';
-                  e.currentTarget.style.borderColor = 'var(--border-hover)';
-                }}
-                onMouseLeave={e => {
-                  e.currentTarget.style.transform = 'translateX(0)';
-                  e.currentTarget.style.borderColor = 'var(--border)';
-                }}
-                >
-                  {/* Icon */}
-                  <div style={{
-                    width: 42, height: 42, borderRadius: 11, flexShrink: 0,
-                    background: 'var(--bg-hover)',
-                    border: '1px solid var(--border)',
+                <div
+                  key={c._id}
+                  className="card"
+                  style={{
+                    padding: '14px 18px',
                     display: 'flex', alignItems: 'center',
-                    justifyContent: 'center', fontSize: 20
+                    gap: 14, cursor: 'pointer',
+                    animation: `fadeUp 0.4s ease both ${0.1 + i * 0.07}s`,
+                    transition: 'all 0.2s ease',
+                  }}
+                  onMouseEnter={e => {
+                    e.currentTarget.style.transform = 'translateX(6px)';
+                    e.currentTarget.style.borderColor = 'rgba(99,102,241,0.4)';
+                    e.currentTarget.style.background = 'var(--bg-hover)';
+                    e.currentTarget.style.boxShadow = '0 4px 20px rgba(0,0,0,0.2)';
+                  }}
+                  onMouseLeave={e => {
+                    e.currentTarget.style.transform = 'translateX(0)';
+                    e.currentTarget.style.borderColor = 'var(--border)';
+                    e.currentTarget.style.background = 'var(--bg-card)';
+                    e.currentTarget.style.boxShadow = 'none';
+                  }}
+                >
+                  <div style={{
+                    width: 44, height: 44,
+                    borderRadius: 11, flexShrink: 0,
+                    background: 'linear-gradient(135deg, rgba(99,102,241,0.15), rgba(139,92,246,0.1))',
+                    border: '1px solid rgba(99,102,241,0.2)',
+                    display: 'flex', alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: 22, lineHeight: 1
                   }}>
                     {ISSUE_ICONS[c.issueType] || '🔧'}
                   </div>
 
-                  {/* Info */}
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{
                       fontSize: 14, fontWeight: 500,
                       color: 'var(--text)', textTransform: 'capitalize',
-                      marginBottom: 3
+                      marginBottom: 4
                     }}>
-                      {c.issueType} issue — {c.category}
+                      {getComplaintIssueLabel(c)} issue — {c.category}
                     </div>
-                    <div style={{ fontSize: 12, color: 'var(--text-faint)' }}>
-                      {c.ticketId} &nbsp;·&nbsp; Floor {c.floor}, Room {c.roomNumber} &nbsp;·&nbsp;
-                      {new Date(c.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
+                    <div style={{
+                      fontSize: 12, color: 'var(--text-faint)',
+                      display: 'flex', alignItems: 'center', gap: 6
+                    }}>
+                      <span>{c.ticketId}</span>
+                      <span style={{ opacity: 0.4 }}>·</span>
+                      <span>Floor {c.floor}, Room {c.roomNumber}</span>
+                      <span style={{ opacity: 0.4 }}>·</span>
+                      <span>{formatDate(c.createdAt)}</span>
                     </div>
                   </div>
 
-                  {/* Badge */}
-                  <StatusBadge status={c.status} />
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
+                    <StatusBadge status={c.status} />
+                    <svg style={{ color: 'var(--text-faint)', flexShrink: 0 }}
+                      width="14" height="14" viewBox="0 0 24 24" fill="none"
+                      stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                      <path d="M5 12h14M12 5l7 7-7 7"/>
+                    </svg>
+                  </div>
                 </div>
               ))
             )}
@@ -258,7 +309,7 @@ export default function Dashboard() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               {[
                 { to: '/new-complaint', icon: '➕', label: 'Report new issue', desc: 'Hostel or classroom' },
-                { to: '/my-complaints', icon: '📋', label: 'My complaints',    desc: 'Track all your issues' },
+                { to: '/my-complaints', icon: '📋', label: 'My complaints', desc: 'Track all your issues' },
               ].map(item => (
                 <Link key={item.to} to={item.to} style={{
                   display: 'flex', alignItems: 'center', gap: 12,
@@ -311,13 +362,14 @@ export default function Dashboard() {
   );
 }
 
-// ── Status Badge component ────────────────────────────
 function StatusBadge({ status }) {
   const map = {
-    'open':        { label: 'Open',        cls: 'badge-open'     },
+    open: { label: 'Open', cls: 'badge-open' },
+    pending: { label: 'Open', cls: 'badge-open' },
     'in-progress': { label: 'In Progress', cls: 'badge-progress' },
-    'resolved':    { label: 'Resolved',    cls: 'badge-resolved' },
+    resolved: { label: 'Resolved', cls: 'badge-resolved' },
   };
-  const { label, cls } = map[status] || { label: status, cls: '' };
+  const normalizedStatus = normalizeComplaintStatus(status);
+  const { label, cls } = map[normalizedStatus] || { label: normalizedStatus, cls: '' };
   return <span className={`badge ${cls}`}>{label}</span>;
 }

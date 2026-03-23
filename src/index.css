@@ -226,3 +226,62 @@ select option { background: var(--bg-card); }
 .fs-12  { font-size: 12px; }
 .fs-13  { font-size: 13px; }
 .fs-14  { font-size: 14px; }
+
+
+/* ── Responsive breakpoints ── */
+/* Mobile: up to 640px */
+/* Tablet: 641px to 1024px */
+
+@media (max-width: 640px) {
+
+  /* Navbar — stack logo + hide labels on mobile */
+  .nav-links-label { display: none; }
+  .nav-mobile-scroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .nav-mobile-scroll::-webkit-scrollbar { display: none; }
+
+  /* Typography scale down */
+  h1 { font-size: 22px !important; }
+  h2 { font-size: 18px !important; }
+
+  /* Utility responsive classes */
+  .mobile-stack {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+  }
+  .mobile-full { width: 100% !important; }
+  .mobile-hide { display: none !important; }
+  .mobile-small-text { font-size: 12px !important; }
+  .mobile-padding { padding: 16px !important; }
+  .mobile-gap { gap: 10px !important; }
+}
+
+@media (max-width: 768px) {
+  .tablet-stack {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+  }
+  .tablet-full { width: 100% !important; }
+  .tablet-hide { display: none !important; }
+}
+
+/* ── New Complaint page — issue grid responsive ── */
+@media (max-width: 640px) {
+  /* 3 columns on mobile instead of 4 */
+  .issue-grid {
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
+
+  /* Category cards stack vertically */
+  .category-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Step indicator text smaller */
+  .step-label {
+    font-size: 10px !important;
+  }
+}
