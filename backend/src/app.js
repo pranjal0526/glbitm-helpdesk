@@ -52,9 +52,19 @@ app.get("/api/health", (_req, res) => {
   });
 });
 
+app.get("/health", (_req, res) => {
+  res.status(200).json({
+    success: true,
+    message: "Server is healthy.",
+  });
+});
+
 app.use("/api/auth", authRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/complaints", complaintRoutes);
+app.use("/auth", authRoutes);
+app.use("/user", userRoutes);
+app.use("/complaints", complaintRoutes);
 
 app.use(notFoundHandler);
 app.use(errorHandler);
