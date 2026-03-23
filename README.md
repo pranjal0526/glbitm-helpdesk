@@ -1,187 +1,115 @@
-# 🚀 GLBITM Helpdesk
+# GLBITM Helpdesk
 
-A full-stack complaint management system designed for college campuses where students can raise issues and track their resolution, while administrators can efficiently manage and resolve them.
+GLBITM Helpdesk is a full-stack complaint management system for college campuses. Students can sign in with Google, file complaints, and track updates, while admins can review, manage, and resolve complaints from a dedicated admin panel.
 
----
+## Features
 
-## 📌 Overview
+- Google OAuth login with backend token verification
+- Allowed-domain and email-whitelist access control
+- Extra admin access-code verification after Google sign-in
+- Student dashboard, complaint filing, and complaint tracking
+- Admin dashboard with recent complaints, full complaint list, filters, notifications, and status updates
+- MongoDB Atlas persistence with ticket IDs and complaint metadata
+- Vercel-ready frontend and API packaging
 
-GLBITM Helpdesk streamlines the process of reporting and resolving campus-related issues such as hostel problems, classroom maintenance, and infrastructure complaints.
+## Tech Stack
 
-The platform ensures **secure access using Google OAuth restricted to institutional email domains (@glbitm.ac.in)**.
+- Frontend: React, React Router, Axios
+- Backend: Node.js, Express, Mongoose
+- Authentication: Google OAuth, JWT
+- Database: MongoDB Atlas
+- Deployment: Vercel
 
----
+## Project Structure
 
-## ✨ Features
+```text
+glbitm-helpdesk/
+  api/
+  backend/
+  public/
+  src/
+  package.json
+  vercel.json
+```
 
-### 👨‍🎓 Student Panel
-
-* 🔐 Login with Google (college email only)
-* 📝 Raise complaints with title & description
-* 📊 Track complaint status (Open / In Progress / Resolved)
-
-### 👨‍💼 Admin Panel
-
-* 📋 View all complaints
-* 🔄 Update complaint status
-* ⚡ Real-time monitoring of issues
-
----
-
-## 🛠️ Tech Stack
+## Local Development
 
 ### Frontend
 
-* React.js
-* Tailwind CSS (or custom styling)
+Create a root `.env` file using `.env.example`.
 
-### Backend
+Example:
 
-* Node.js
-* Express.js
-
-### Database
-
-* MongoDB Atlas
-
-### Authentication
-
-* Google OAuth (via @react-oauth/google + backend verification)
-
----
-
-## 🔐 Authentication Flow
-
-1. User clicks **“Continue with Google”**
-2. Google returns an ID token
-3. Frontend sends token to backend
-4. Backend verifies token using Google Auth Library
-5. Only emails ending with **@glbitm.ac.in** are allowed
-
----
-
-## 📂 Project Structure
-
-```
-glb-helpdesk/
-│
-├── frontend/
-│   ├── src/
-│   └── ...
-│
-├── backend/
-│   ├── src/
-│   │   ├── controllers/
-│   │   ├── routes/
-│   │   ├── models/
-│   │   └── app.js
-│   ├── server.js
-│   └── .env
-│
-└── README.md
+```env
+REACT_APP_API_BASE_URL=http://localhost:5000/api
+REACT_APP_GOOGLE_CLIENT_ID=your-google-client-id.apps.googleusercontent.com
+REACT_APP_ALLOWED_DOMAIN=glbitm.ac.in
 ```
 
----
+Run:
 
-## ⚙️ Installation & Setup
-
-### 🔹 1. Clone the Repository
-
-```
-git clone https://github.com/your-username/glbitm-helpdesk.git
-cd glbitm-helpdesk
-```
-
----
-
-### 🔹 2. Backend Setup
-
-```
-cd backend
-npm install
-```
-
-Create `.env` file:
-
-```
-PORT=5000
-MONGO_URI=your_mongodb_connection_string
-GOOGLE_CLIENT_ID=your_google_client_id
-```
-
-Run backend:
-
-```
-npm run dev
-```
-
----
-
-### 🔹 3. Frontend Setup
-
-```
-cd frontend
+```bash
 npm install
 npm start
 ```
 
----
+### Backend
 
-## 🌐 Environment Variables
+Create `backend/.env` using `backend/.env.example`.
 
-### Backend `.env`
+Required values include:
 
+```env
+MONGODB_URI=your-mongodb-atlas-uri
+GOOGLE_CLIENT_ID=your-google-client-id.apps.googleusercontent.com
+JWT_SECRET=your-jwt-secret
+ALLOWED_EMAIL_DOMAINS=glbitm.ac.in
+ALLOWED_EMAILS=
+ADMIN_EMAILS=your-admin-email@example.com
+ADMIN_ACCESS_CODE=your-unique-admin-code
 ```
-PORT=5000
-MONGO_URI=your_mongodb_uri
-GOOGLE_CLIENT_ID=your_client_id
+
+Run:
+
+```bash
+cd backend
+npm install
+npm start
 ```
 
----
+## Important Routes
 
-## 🧪 API Endpoints
+### Frontend
 
-### 🔐 Auth
+- `/login`
+- `/dashboard`
+- `/new-complaint`
+- `/my-complaints`
+- `/admin`
+- `/admin/complaints`
 
-* `POST /api/auth/google` → Google login
+### Backend
 
-### 🧾 Complaints
+- `POST /api/auth/google-login`
+- `POST /api/auth/admin-verify`
+- `GET /api/user/me`
+- `POST /api/complaints`
+- `GET /api/complaints`
+- `PATCH /api/complaints/:id`
 
-* `POST /api/complaints` → Create complaint
-* `GET /api/complaints` → Get all complaints
-* `PUT /api/complaints/:id` → Update status
+## Deployment
 
----
+This repository is packaged for Vercel:
 
-## 🔮 Future Enhancements
+- static frontend build from the root app
+- serverless API handlers under `api/`
+- shared backend logic reused from `backend/src`
 
-* 📩 Email notifications for admins
-* 🔔 Real-time updates (Socket.io)
-* 📱 Mobile responsive UI improvements
-* 📊 Analytics dashboard
-* 🧑‍🤝‍🧑 Role-based access control (RBAC)
+Set the required frontend and backend environment variables in Vercel before deploying.
 
----
+## Credits
 
-## 🤝 Contributing
+- Pranjal Pandey: Backend
+- Keshav Gupta: Frontend
 
-Contributions are welcome! Feel free to fork this repository and submit a pull request.
-
----
-
-## 📄 License
-
-This project is licensed under the MIT License.
-
----
-
-## 👨‍💻 Author
-
-**Pranjal Pandey**
-B.Tech CSE (AI/ML) | Developer
-
----
-
-## ⭐ Show Your Support
-
-If you like this project, give it a ⭐ on GitHub!
+Made with Love in Noida.
